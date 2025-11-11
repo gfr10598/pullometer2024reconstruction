@@ -57,3 +57,11 @@ I (338) example: I2C de-initialized successfully
     - consequently, the arduino-esp32 component wouldn't compile.
 - used vscode Select Current ESP-IDF Version to change the to 5.5.1
 - manually changed the version in the idf_component.yml file.
+
+Then
+- replaced template code with old code
+- idf.py add-dependency again, and updated version requirements
+- deleted old main.c
+- idf.py fullclean && idf.py build - BUILDS!!
+
+Need to test on duplicate hardware.
