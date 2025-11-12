@@ -64,4 +64,16 @@ Then
 - deleted old main.c
 - idf.py fullclean && idf.py build - BUILDS!!
 
-Need to test on duplicate hardware.
+Make sure to use the 5.5.1 (or later) version of ESP_IDF tools.
+
+A lot of code is now in ./managed_components/espressif__arduino-esp32/libraries/,
+including things like Wire.  It does not need to be saved in git, because the build
+process will download it, based on the arduino-esp32 dependency.
+
+Now, how do we add the LSM library?  I'm trying it out as a git submodule, under components,
+with a CMakeLists file to create an idf component.
+However, it looks like I wrote a bit of extra code in the LSM...cpp file that doesn't exist
+in the STMicro code.  
+
+It seems to compile fine if I delete my copies of lsm*.h and lsm*.c files, and let the LSM*.cpp 
+pick those up from the component.  Yay!  Still need to test it on a copy of the hardware. 
