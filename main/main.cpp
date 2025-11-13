@@ -1,3 +1,25 @@
+/*
+Just collecting the data is likely to require about 30% of one CPU,
+because the CPU is busy when reading the data over I2C.
+This will likely mean power consumption of at least 20mA just to read
+the data.  We can hopefully use the other processor to concurrently
+write the data to the flash.
+
+We can download 32 records at a time, which is 16 samples, which is
+about 8 msec.  So, we might want to download on a timer, say about
+every 5 msec, to keep the FIFO from overflowing.
+
+This could allow us to wake up every 5 msec, read the data, post it
+to the other processor through a queue, and go back
+into light sleep.
+Periodically, the other processor will write the data to flash.
+Apparently the SD card write speed is about 200kB/sec, so a 4kB
+write will take about 20 msec.  But the incoming data rate, before
+expanding to base64, is about 2*2*7byte/ms = 28kB/sec.  So the
+processor will only require about 20% duty cycle to keep up.
+
+*/
+
 #include "Arduino.h"
 #include <stdio.h>
 #include "LSM6DSV16XSensor.h"
@@ -13,6 +35,9 @@
 LSM6DSV16XSensor init_lsm()
 {
     // Initialize i2c.
+    // We need to read roughly 7*2*2khz = 28k bytes per second from the LSM6DSV16X.
+    // Because we are reading many bytes at a time, 1MHz I2C can provide perhaps
+    // 100k bytes/sec.  So we will be running around 30% duty cycle just reading the data.
     Wire.begin(3, 4, 1000000);
     printf("I2C initialized\n");
     LSM6DSV16XSensor LSM(&Wire);
